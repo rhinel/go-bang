@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>GoBang</title>
+  <style>
+    html {
+      font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    }
+
+    .create-group,
+    .tip-group {
+      margin: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="create-group">
+    <div>x: <input id="x" value="15"></div>
+    <div>y: <input id="y" value="15"></div>
+    <div><button id="createBtn">生成棋盘/重置棋盘</button></div>
+  </div>
+
+  <div class="tip-group">
+    <div>当前该落子者：<span id="nowSetter"></span></div>
+    <div>是否人机对战（<span id="nameAI">null</span>为AI）：<input type="checkbox" id="isAI" disabled></div>
+    <div><button id="retract">悔棋</button> <button id="reDo">撤销悔棋</button></div>
+  </div>
+
+  <canvas id="chess" width="450px" height="450px"></canvas>
+  <script src="./go-bang.js"></script>
+  <script>
+    // 棋盘对象
+    let goBang;
+
+    // dom对象
+    const createBtn = document.querySelector('#createBtn')
+    const x = document.querySelector('#x')
+    const y = document.querySelector('#y')
+    const nowSetter = document.querySelector('#nowSetter')
+    const isAI = document.querySelector('#isAI')
+    const nameAI = document.querySelector('#nameAI')
+    const chess = document.querySelector('#chess')
+    const retract = document.querySelector('#retract')
+    const reDo = document.querySelector('#reDo')
+
+    // 初始化棋盘
+    createBtn.onclick = () => {
+      if (!x.value || !y.value) {
+        return alert('请输入棋盘大小')
+      }
+      if (x.value < 5 || y.value < 5) {
+        return alert('请输入正确的棋盘大小')
+      }
+
+      goBang = new window.GoBang(x.value, y.value, '#chess')
+      nowSetter.innerHTML = goBang.nowSetter
+
+      isAI.disabled = false
+    }
+
+    // 下棋点击事件
+    chess.onclick = (e) => {
+      if (!goBang) return
+
+      // 此处没有封装AI内部状态
+      // 方便设置人人、人AI、双AI对战方式
+      // 落子，失败不能继续（和局、获胜、点已下等问题）
+      const isSet = goBang.GoSetPointClickTrans(e.offsetX, e.offsetY)
+
+      if (!isSet) return
+
+      nowSetter.innerHTML = goBang.nowSetter
+
+      // 下完让AI下
+      if (isAI.checked) {
+        goBang.GoComputerAI()
+        nowSetter.innerHTML = goBang.nowSetter
+      }
+    }
+
+    // AI状态切换
+    isAI.onchange = () => {
+      if (!goBang) return
+
+      // AI名字为非当前落子者
+      if (isAI.checked) {
+        nameAI.innerHTML = goBang.nowSetter === 'black'
+          ? 'white' : 'black'
+      } else {
+        nameAI.innerHTML = 'null'
+      }
+    }
+
+    // 悔棋
+    retract.onclick = () => {
+      if (!goBang) return
+
+      goBang.GoRetractPoint()
+      nowSetter.innerHTML = goBang.nowSetter
+    }
+
+    // 撤销悔棋
+    reDo.onclick = () => {
+      if (!goBang) return
+
+      goBang.GoReDoSetPoint()
+      nowSetter.innerHTML = goBang.nowSetter
+    }
+  </script>
+</body>
+</html>
