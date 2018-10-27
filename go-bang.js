@@ -4,9 +4,16 @@ class GoBang {
     this.x = Number(x)
     this.y = Number(y)
 
-    // canvas, chessboard, winmethod
-    this.chessId = chessId
-    this.context = this.PrintCanvasChessBoard()
+    // canvas/div, chessboard, winmethod
+    this.chess = document.querySelector(chessId)
+    this.chessNodeName = this.chess.nodeName
+
+    if (this.chessNodeName === 'CANVAS') {
+      this.context = this.PrintCanvasChessBoard()
+    } else {
+      this.PrintDivChessBoard()
+    }
+
     this.chessBoard = this.CreateChessBoard()
     this.winMethod = this.CreateWinMethod()
 
@@ -26,11 +33,10 @@ class GoBang {
   PrintCanvasChessBoard(
     x = this.x,
     y = this.y,
-    chessId = this.chessId,
+    chess = this.chess,
   ) {
     // 画一个棋盘
     // 返回画布对象
-    const chess = document.querySelector(chessId)
     chess.width = x * 30
     chess.height = y * 30
     const context = chess.getContext('2d')
@@ -120,6 +126,92 @@ class GoBang {
     )
     context.stroke()
     context.closePath()
+  }
+
+  PrintDivChessBoard(
+    x = this.x,
+    y = this.y,
+    chess = this.chess,
+  ) {
+    // 画一个棋盘
+    if (chess.children.length) chess.innerHTML = ''
+
+    const chessStyle = {
+      position: 'relative',
+      padding: '15px',
+      width: `${x * 30 + 1}px`,
+      height: `${y * 30 + 1}px`,
+    }
+    Object.assign(chess.style, chessStyle)
+
+    const contextStyle = {
+      display: 'flex',
+      width: `${x * 30}px`,
+      height: `${y * 30}px`,
+      flexWrap: 'wrap',
+      borderTop: '1px solid #000',
+      borderLeft: '1px solid #000',
+      pointerEvents: 'none',
+    }
+
+    const context = document.createElement('div')
+    Object.assign(context.style, contextStyle)
+
+    const boxStyle = {
+      width: '29px',
+      height: '29px',
+      borderRight: '1px solid #000',
+      borderBottom: '1px solid #000',
+      pointerEvents: 'none',
+    }
+
+    const contextBoxs = document.createDocumentFragment()
+
+    for (let i = 0; i < x * y; i += 1) {
+      const box = document.createElement('div')
+      Object.assign(box.style, boxStyle)
+      contextBoxs.appendChild(box)
+    }
+
+    context.appendChild(contextBoxs)
+    chess.appendChild(context)
+  }
+
+  PrintDivPoint(
+    x,
+    y,
+    setter = this.nowSetter,
+    chess = this.chess,
+  ) {
+    // 画一个落子
+    const pointStyle = {
+      position: 'absolute',
+      width: '28px',
+      height: '28px',
+      left: `${x * 30 - 1}px`,
+      top: `${y * 30 - 1}px`,
+      borderRadius: '50%',
+      border: '1px solid #000',
+      backgroundColor: setter,
+      pointerEvents: 'none',
+    }
+
+    const point = document.createElement('div')
+    point.id = `x${x}y${y}`
+    Object.assign(point.style, pointStyle)
+
+    chess.appendChild(point)
+  }
+
+  PrintDivNoPoint(
+    x,
+    y,
+    chess = this.chess,
+  ) {
+    // 清空一个落子
+    // 用于悔棋
+    const point = chess.querySelector(`#x${x}y${y}`)
+    chess.removeChild(point)
   }
 
   CreatePoint(
@@ -362,7 +454,11 @@ class GoBang {
     if (this.setRetract.length) this.setRetract = []
 
     // 画子
-    this.PrintCanvasPoint(x, y)
+    if (this.chessNodeName === 'CANVAS') {
+      this.PrintCanvasPoint(x, y)
+    } else {
+      this.PrintDivPoint(x, y)
+    }
 
     // 检查是否赢了，赢了设置锁定盘局
     const setterIsWin = this.CheckSetterPointIsWin(x, y)
@@ -446,7 +542,11 @@ class GoBang {
       lastSet.setter = null
       setRetract.push(lastSet)
 
-      this.PrintCanvasNoPoint(lastSet.x, lastSet.y)
+      if (this.chessNodeName === 'CANVAS') {
+        this.PrintCanvasNoPoint(lastSet.x, lastSet.y)
+      } else {
+        this.PrintDivNoPoint(lastSet.x, lastSet.y)
+      }
     }
   }
 
@@ -477,7 +577,11 @@ class GoBang {
       lastSet.reSetter = null
       setOrder.push(lastSet)
 
-      this.PrintCanvasPoint(lastSet.x, lastSet.y, lastSet.setter)
+      if (this.chessNodeName === 'CANVAS') {
+        this.PrintCanvasPoint(lastSet.x, lastSet.y, lastSet.setter)
+      } else {
+        this.PrintDivPoint(lastSet.x, lastSet.y, lastSet.setter)
+      }
     }
   }
 }

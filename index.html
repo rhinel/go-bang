@@ -20,17 +20,27 @@
   <div class="create-group">
     <div>x: <input id="x" value="15"></div>
     <div>y: <input id="y" value="15"></div>
+    <div>
+      <label for="chessTypeCvs">
+        <input type="radio" id="chessTypeCvs" name="chessType" value="#chessCvs" checked>CANVAS棋盘
+      </label>
+      <label for="chessTypeDiv">
+        <input type="radio" id="chessTypeDiv" name="chessType" value="#chessDiv">DIV棋盘
+      </label>
+    </div>
     <div><button id="createBtn">生成棋盘/重置棋盘</button></div>
   </div>
 
   <div class="tip-group">
     <div>当前该落子者：<span id="nowSetter"></span></div>
-    <div>是否人机对战（<span id="nameAI">null</span>为AI）：<input type="checkbox" id="isAI" disabled></div>
+    <div>是否托管为人机对战（<span id="nameAI">null</span>为AI）：<input type="checkbox" id="isAI" disabled></div>
     <div><button id="retract">悔棋</button> <button id="reDo">撤销悔棋</button></div>
   </div>
 
-  <canvas id="chess" width="450px" height="450px"></canvas>
+  <div id="chessWrap"></div>
+
   <script src="./go-bang.js"></script>
+
   <script>
     // 棋盘对象
     let goBang;
@@ -42,7 +52,7 @@
     const nowSetter = document.querySelector('#nowSetter')
     const isAI = document.querySelector('#isAI')
     const nameAI = document.querySelector('#nameAI')
-    const chess = document.querySelector('#chess')
+    const chessWrap = document.querySelector('#chessWrap')
     const retract = document.querySelector('#retract')
     const reDo = document.querySelector('#reDo')
 
@@ -55,29 +65,40 @@
         return alert('请输入正确的棋盘大小')
       }
 
+      // 清除旧棋盘，主要是为了切换两种实现类型
+      if (chessWrap.children[0]) chessWrap.children[0].remove()
+
+      const chessType = document
+        .querySelector('input[name=chessType]:checked').value
+      const chess = document
+        .createElement(chessType === '#chessCvs' ? 'canvas' : 'div')
+      chess.id = 'chess'
+      chessWrap.appendChild(chess)
+
+      // new
       goBang = new window.GoBang(x.value, y.value, '#chess')
       nowSetter.innerHTML = goBang.nowSetter
 
       isAI.disabled = false
-    }
 
-    // 下棋点击事件
-    chess.onclick = (e) => {
-      if (!goBang) return
+      // 下棋点击事件
+      chess.onclick = (e) => {
+        if (!goBang) return
 
-      // 此处没有封装AI内部状态
-      // 方便设置人人、人AI、双AI对战方式
-      // 落子，失败不能继续（和局、获胜、点已下等问题）
-      const isSet = goBang.GoSetPointClickTrans(e.offsetX, e.offsetY)
+        // 此处没有封装AI内部状态
+        // 方便设置人人、人AI、双AI对战方式
+        // 落子，失败不能继续（和局、获胜、点已下等问题）
+        const isSet = goBang.GoSetPointClickTrans(e.offsetX, e.offsetY)
 
-      if (!isSet) return
+        if (!isSet) return
 
-      nowSetter.innerHTML = goBang.nowSetter
-
-      // 下完让AI下
-      if (isAI.checked) {
-        goBang.GoComputerAI()
         nowSetter.innerHTML = goBang.nowSetter
+
+        // 下完让AI下
+        if (isAI.checked) {
+          goBang.GoComputerAI()
+          nowSetter.innerHTML = goBang.nowSetter
+        }
       }
     }
 
