@@ -139,15 +139,15 @@ class GoBang {
     const chessStyle = {
       position: 'relative',
       padding: '15px',
-      width: `${x * 30 + 1}px`,
-      height: `${y * 30 + 1}px`,
+      width: `${x * 30 - 29}px`,
+      height: `${y * 30 - 29}px`,
     }
     Object.assign(chess.style, chessStyle)
 
     const contextStyle = {
       display: 'flex',
-      width: `${x * 30}px`,
-      height: `${y * 30}px`,
+      width: `${(x - 1) * 30}px`,
+      height: `${(y - 1) * 30}px`,
       flexWrap: 'wrap',
       borderTop: '1px solid #000',
       borderLeft: '1px solid #000',
@@ -167,7 +167,7 @@ class GoBang {
 
     const contextBoxs = document.createDocumentFragment()
 
-    for (let i = 0; i < x * y; i += 1) {
+    for (let i = 0; i < (x - 1) * (y - 1); i += 1) {
       const box = document.createElement('div')
       Object.assign(box.style, boxStyle)
       contextBoxs.appendChild(box)
