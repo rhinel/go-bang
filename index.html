@@ -68,6 +68,7 @@
       // 清除旧棋盘，主要是为了切换两种实现类型
       if (chessWrap.children[0]) chessWrap.children[0].remove()
 
+      // new
       const chessType = document
         .querySelector('input[name=chessType]:checked').value
       const chess = document
@@ -75,10 +76,11 @@
       chess.id = 'chess'
       chessWrap.appendChild(chess)
 
-      // new
       goBang = new window.GoBang(x.value, y.value, '#chess')
       nowSetter.innerHTML = goBang.nowSetter
 
+      nameAI.innerHTML = 'null'
+      isAI.checked = false
       isAI.disabled = false
 
       // 下棋点击事件
