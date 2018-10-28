@@ -43,7 +43,7 @@
 
   <script>
     // 棋盘对象
-    let goBang;
+    let goBang
 
     // dom对象
     const createBtn = document.querySelector('#createBtn')
@@ -59,10 +59,12 @@
     // 初始化棋盘
     createBtn.onclick = () => {
       if (!x.value || !y.value) {
-        return alert('请输入棋盘大小')
+        alert('请输入棋盘大小')
+        return
       }
       if (x.value < 5 || y.value < 5) {
-        return alert('请输入正确的棋盘大小')
+        alert('请输入正确的棋盘大小')
+        return
       }
 
       // 清除旧棋盘，主要是为了切换两种实现类型
